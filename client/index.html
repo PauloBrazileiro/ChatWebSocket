@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="PT-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client</title>
+</head>
+<body>
+    <div class="container" style="display:flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;">
+
+        <div id="chatContainer" style="width:550px; height: 50vh; background: rgb(255, 255, 255); border: 1px solid black; overflow:scroll;">
+            <ul id="chatBoard"> 
+                
+            </ul>
+        </div>
+        <br>
+        <br>
+        
+        
+        <div name="form" style="text-align: center;">
+            <input type="text" id="msg" style="width: 250px;" placeholder="Escreva sua mensagem aqui...">
+            <input type="submit" value="Enviar" id="subMsg" style="width: 150px;">
+        </div>
+        
+    </div>
+        
+        <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+        <script>
+            //Definindo as variaveis necessarias
+            
+            const nickname = prompt('Qual é o seu nickname?');
+            const socket = io('ws://localhost:5000') // Iniciando o WebSocket e conectando ao servidor
+        const subMsg = document.getElementById('subMsg') // Alocando o button "Enviar" na variavel subMsg
+
+        let userContent = {
+                content:{
+                    name:'',
+                    message:''
+                    }
+                }
+
+
+        subMsg.addEventListener('click', ()=>{
+            userContent.content.name = nickname
+            userContent.content.message = document.getElementById('msg').value
+            
+            socket.emit('chat msg', userContent)
+            userContent.content.message = document.getElementById('msg').value = ''
+            return false
+        })
+
+        socket.on('connect',()=>{
+            socket.emit('in chat', nickname)
+        })
+
+        socket.on('chat msg',(data)=>{
+            const ul = document.querySelector('ul');
+            const li = document.createElement('li');
+            li.innerHTML = `<span><b>${data.content.name}: </b></span>${data.content.message}`;
+            li.setAttribute('style', 'max-width:510px;');
+            ul.appendChild(li);
+        })
+
+        socket.on('in chat', (data)=>{
+            const ul = document.querySelector('ul');
+            const li = document.createElement('li');
+            li.innerHTML = `<span style="text-align:center; color:red;">${data.name} entrou no chat: </span>`;
+            ul.appendChild(li);
+        })
+
+
+    </script>
+
+</body>
+</html>
